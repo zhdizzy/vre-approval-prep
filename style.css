@@ -741,6 +741,9 @@ details.how-it-works[open] summary { margin-bottom: 10px; }
 #live-strip .ready { font-size: 1.15rem; font-weight: 800; color: var(--primary); }
 #live-strip .stake { font-size: 1.15rem; font-weight: 800; color: var(--green); }
 
+/* Lists inside cards carry their own layout: undo the generic .sc-body list indent */
+.stack-card .sc-body .ready-list, .stack-card .sc-body .q-list, .stack-card .sc-body .ev-list, .stack-card .sc-body .steps-list { padding-left: 0; margin-left: 0; }
+
 /* Readiness list */
 .ready-list { list-style: none; padding: 0; margin: 6px 0 0; }
 .ready-list li { display: grid; grid-template-columns: 112px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-color); align-items: start; }
