@@ -1,5 +1,5 @@
 // VR&E Approval Prep — UI wiring on the house template (forked from veteran-business 9/30/26).
-import { DATA_STAMP, LADDER, HIGH_COST_THRESHOLD, ladderTier, FOUR_QUESTIONS, RULES, ESCALATION, REAPPLY_WARNING, WH_HOTLINE, ONE_ON_ONE, CANT_DO, PRESTIGE_NOTE } from './data/rules.js';
+import { DATA_STAMP, LADDER, HIGH_COST_THRESHOLD, ladderTier, FOUR_QUESTIONS, RULES, ESCALATION, REAPPLY_WARNING, WH_HOTLINE, ONE_ON_ONE, CANT_DO, PRESTIGE_NOTE, REGION_NOTE } from './data/rules.js';
 import { OBJECTIONS, OBJECTION_BY_ID } from './data/objections.js';
 import { LIMITS, FITS, FEATURES, LIMIT_BY_ID, FIT_BY_ID, FEATURE_BY_ID } from './data/limits.js';
 import { OCCUPATIONS, occupationUrl, findOccupation } from './data/occupations.js';
@@ -23,7 +23,7 @@ $('data-stamp').textContent = DATA_STAMP;
 /* ─── Elements ─────────────────────────────────────────────────────────── */
 const ratingEl = $('rating'), statusEl = $('status'), educationEl = $('education'), programEl = $('program-level'), goalEl = $('goal'), costEl = $('cost');
 const objectionEl = $('objection'), happenedEl = $('happened');
-const weamsEl = $('weams'), altCostEl = $('alt-cost'), altNameEl = $('alt-name'), enrolledEl = $('enrolled'), yearsEl = $('years');
+const weamsEl = $('weams'), altCostEl = $('alt-cost'), altNameEl = $('alt-name'), altLacksEl = $('alt-lacks'), enrolledEl = $('enrolled'), yearsEl = $('years');
 const dischargeEl = $('discharge-year'), firstRatingEl = $('first-rating-year'), activeEl = $('active-duty'), depsEl = $('deps'), giEl = $('gi'), giUsedEl = $('gi-used');
 
 $('limits').innerHTML = LIMITS.map(l => `<label><input type="checkbox" data-limit="${l.id}"> ${esc(l.label)}</label>`).join('');
@@ -98,7 +98,7 @@ function buildInput() {
     status: statusEl.value || null, education: educationEl.value || null, programLevel,
     cost: parseFloat(costEl.value) || 0, years,
     objection: objectionEl.value, happened: happenedEl.value,
-    weams: weamsEl.value, altCost: parseFloat(altCostEl.value) || 0,
+    weams: weamsEl.value, altCost: parseFloat(altCostEl.value) || 0, altLacksProgram: altLacksEl.checked,
     enrolled: enrolledEl.value === 'yes',
     dischargeYear: parseInt(dischargeEl.value, 10) || null, firstRatingYear: parseInt(firstRatingEl.value, 10) || null,
     activeDuty: activeEl.value === 'yes', deps: parseInt(depsEl.value, 10) || 0, gi: giEl.value, giUsed: giUsedEl.value === '' ? null : Math.max(0, parseInt(giUsedEl.value, 10) || 0),
@@ -183,7 +183,7 @@ function gapTarget(key) {
     case 'goal': return (s.priv.goal || '').trim() ? { sel: '[data-occ="0"]', fillin: true } : { sel: '#goal' };
     case 'level': return { sel: !s.education ? '#education' : '#program-level' };
     case 'weams': return { sel: '#weams', drawer: true };
-    case 'cost': return s.cost > HIGH_COST_THRESHOLD ? ((s.altCost > 0 || (s.priv.altName || '').trim()) ? { sel: '#features', drawer: true } : { sel: '#alt-cost', drawer: true }) : { sel: '#cost' };
+    case 'cost': return s.cost > HIGH_COST_THRESHOLD ? ((s.altCost > 0 || (s.priv.altName || '').trim()) ? { sel: '#alt-lacks', drawer: true } : { sel: '#alt-cost', drawer: true }) : { sel: '#cost' };
     case 'months': return s.giUsed == null ? { sel: '#gi-used', drawer: true } : { sel: '#fill-in', fillin: true };
     case 'evidence': return { sel: '#card-evidence .ev-list', card: '#card-evidence' };
     case 'fillin': return { sel: '#fill-in', fillin: true };
@@ -227,7 +227,7 @@ function renderHero(r) {
   } else if (s.mode === 'denied') {
     const e = ESCALATION[s.happened];
     kicker = 'Your next step';
-    line = `<strong>${esc(e.title)}.</strong> Your next move is <strong>${esc(e.steps[0][0].toLowerCase())}</strong>. Don\u2019t start over with a new application before you have used the review rights on the decision you already have; the clock on those is one year. The full order of operations is below, and the letter restates your case for whoever reads it next.`;
+    line = `<strong>${esc(e.title)}.</strong> Your next move is <strong>${esc(e.steps[0][0].toLowerCase())}</strong>. Keep a review lane open on the decision you already have; the clock on it is one year. Applying again can run alongside a review, never in place of one. The full order of operations is below, and the letter restates your case for whoever reads it next.`;
   } else {
     kicker = r.gaps.length ? `Ready on ${r.readyCount} of ${r.ready.length}` : 'Ready to walk in';
     line = r.gaps.length
@@ -272,7 +272,7 @@ function renderCards(r) {
     cards.ladder = card('ladder', 'Who approves your plan', s.cost > 0 ? esc(t.short) + (t.memo ? ' · memo' : '') : 'enter cost', s.cost > 0 && t.memo ? 'door' : '', `${lead}
       <div class="table-scroll"><table class="cmp-table ladder-table"><thead><tr><th>Annual program cost</th><th>Approver</th><th>High-cost memo</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p><strong>What counts as program cost:</strong> tuition, fees, books, and supplies over the 12 months from the first term after the plan is written. Subsistence does not count. <strong>Timing:</strong> the memo is approved before the plan is signed, and once approved covers the whole training period unless the school or the goal changes. <strong>Watch year two:</strong> costs are rechecked at every annual review, so a tuition increase can trigger a memo later.</p>
-      ${ruleBlock('highCost')}${ruleBlock('ladder')}${ruleBlock('inState')}
+      ${ruleBlock('memoMust')}${ruleBlock('highCost')}${ruleBlock('ladder')}${ruleBlock('inState')}
       ${s.cost > 0 && t.index >= 2 ? oneLine('cost') : ''}`, false);
   }
   // Four questions
@@ -289,7 +289,7 @@ function renderCards(r) {
       <p>When a cheaper school exists and the cost difference is significant, VA’s manual requires the counselor to answer these four questions in writing, on VA Form 28-1902n, <em>before</em> the plan is written. Two of them are about support for your disability. Answer them for the counselor, in their own framework.</p>
       <div class="callout callout-gold"><h3>${esc(PRESTIGE_NOTE.title)}</h3><p>${esc(PRESTIGE_NOTE.text)}</p></div>
       <ol class="q-list">${items}</ol>
-      ${ruleBlock('preference')}${ruleBlock('costFactor')}`, false);
+      ${ruleBlock('planServices')}${ruleBlock('preference')}${ruleBlock('costFactor')}`, false);
   }
   // Letter
   cards.letter = card('letter', 'Your letter to the counselor', `${countBrackets(r.letter)} brackets left`, 'door', renderLetterCard(r), true);
@@ -315,7 +315,8 @@ function renderCards(r) {
     const others = Object.entries(ESCALATION).filter(([k]) => k !== key);
     const steps = ee => `<ol class="steps-list">${ee.steps.map(([t2, w]) => `<li><div><p class="st-t">${esc(t2)}</p><p class="st-w">${esc(w)}</p></div></li>`).join('')}</ol>`;
     cards.escalation = card('escalation', 'If you’re stalled or denied', esc(e.title), s.mode === 'denied' || s.status === 'denied' ? 'door' : 'off', `
-      <div class="warn-line"><strong>Don\u2019t start over.</strong> ${esc(REAPPLY_WARNING)}</div>
+      <div class="warn-line"><strong>Review first. Reapply only alongside.</strong> ${esc(REAPPLY_WARNING)}</div>
+      <p class="region-note">${esc(REGION_NOTE)}</p>
       <p><strong>${esc(e.title)}</strong></p>${steps(e)}
       ${others.map(([, ee]) => `<details class="faq-item"><summary>${esc(ee.title)}</summary><div style="padding:0 18px 12px">${steps(ee)}</div></details>`).join('')}
       ${ruleBlock('review')}${ruleBlock('dueProcess')}${key === 'orientation' ? ruleBlock('noShow') : ''}
@@ -513,11 +514,12 @@ $('faq-items').innerHTML = FAQ.map(([q, a]) => `<details class="faq-item"><summa
 
 /* ─── Share URL (selections only; nothing personal, no limits, no features) ── */
 const URL_FIELDS = [['r', ratingEl], ['st', statusEl], ['ed', educationEl], ['pl', programEl], ['c', costEl], ['yr', yearsEl], ['dy', dischargeEl], ['fr', firstRatingEl], ['ad', activeEl], ['en', enrolledEl], ['ac', altCostEl], ['wm', weamsEl], ['dep', depsEl], ['gi', giEl], ['gu', giUsedEl], ['ob', objectionEl], ['wh', happenedEl]];
-const SHARE_KEYS = new Set(['m', ...URL_FIELDS.map(([k]) => k), 'ev']);
+const SHARE_KEYS = new Set(['m', ...URL_FIELDS.map(([k]) => k), 'ev', 'ap']);
 function buildShareUrl() {
   const p = new URLSearchParams();
   p.set('m', state.mode);
   for (const [k, el] of URL_FIELDS) if (el.value !== '' && el.value != null) p.set(k, el.value);
+  if (altLacksEl.checked) p.set('ap', '1');
   if (state.evidence.size) p.set('ev', [...state.evidence].join('.'));
   return location.origin + location.pathname + '?' + p.toString() + '&source=' + SOURCE;
 }
@@ -528,6 +530,7 @@ function loadFromUrl() {
   if (!p.has('r')) { if (p.has('m') && MODE_BRIEF[p.get('m')]) { setMode(p.get('m')); history.replaceState(null, '', location.pathname); } return false; }
   setMode(MODE_BRIEF[p.get('m')] ? p.get('m') : 'first');
   for (const [k, el] of URL_FIELDS) if (p.has(k)) el.value = p.get(k);
+  altLacksEl.checked = p.get('ap') === '1';
   if (p.has('ev')) p.get('ev').split('.').filter(Boolean).forEach(x => state.evidence.add(x));
   syncConditionalFields();
   if (p.has('dy') || p.has('ac') || p.has('en')) $('assumptions-drawer').open = true;

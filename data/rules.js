@@ -175,6 +175,22 @@ Object.assign(RULES, {
   },
 });
 
+Object.assign(RULES, {
+  memoMust: {
+    id: 'memoMust', cite: 'M28C.V.B.1.02 and 1.02.a; M28C.IV.C.2.03.b', url: KNOWVA.approvals, verified: VERIFIED,
+    title: '$50,000 is a signature line, not a limit',
+    plain: 'The $50,000 figure is the amount a counselor can approve alone. It is not a cap on what VR&E pays and it is not a rule that you must pick a program under it. When a plan runs over, the manual says the counselor must complete the high program costs memo and submit it to the VR&E Officer, and the same chapter says program costs should not restrict the services a veteran gets. Nothing in either chapter says the memo is reserved for cases with no cheaper option. What the counselor does decide is the facility: if they find a cheaper school meets your needs and can deliver your plan, that is the decision to challenge, and it has to be put in writing with its reasons.',
+    quote: 'The program costs approval threshold for a Vocational Rehabilitation Counselor (VRC) is $50,000 annually. If the program costs exceed the VRC\u2019s approval level, the VRC must complete and submit the high program costs memo to the VR&E Officer. \u2026 Note: Program costs should not restrict the types of services provided to any Veteran, since services are based on the identified needs and corresponding services outlined in the Veteran\u2019s rehabilitation plan.',
+  },
+  planServices: {
+    id: 'planServices', cite: '38 CFR 21.120(c)(1)(ii)', url: ECFR('120'), verified: VERIFIED,
+    title: 'First test: can the cheaper school deliver your plan at all?',
+    plain: 'Cost only becomes a factor among facilities that can provide the education and training services your plan calls for. If the cheaper school does not offer the program, specialization, or credential your vocational goal requires, it is not a real alternative, and the comparison never reaches cost. Say exactly what it lacks: the degree, the concentration, the required coursework, the license preparation.',
+    quote: 'Can provide the education and training services, and other supportive services specified in the veteran\u2019s plan',
+  },
+});
+export const REGION_NOTE = 'Reported by veterans, not confirmed as policy: changing your address may not move your case. A case being handled virtually can stay with the original regional office after you move. If you relocate to be near your school, ask in writing for in-person meetings at the office that serves your new address, and confirm which office holds your case.';
+
 /* ─── Track names as va.gov lists them (tracks page updated 6/15/26) ────── */
 export const TRACK_LONG_TERM = 'Employment Through Long-Term Services';
 
@@ -192,8 +208,10 @@ export const ESCALATION = {
   denied: {
     title: 'Denied in writing',
     steps: [
-      ['Read the decision for the element that failed', 'The letter has to name the elements not satisfied (38 CFR 21.420(b)(5)) and come with VA Form 20-0998, your review rights. Your response answers that element, not a general one: no employment handicap found, goal not feasible, training not needed for entry, facility.'],
-      ['Pick one review lane inside one year', 'Supplemental Claim if you have new and relevant evidence (an accommodation letter, a provider statement, job postings): VA Form 20-0995 to your regional office. Higher-Level Review if the error is in how the existing record was read: VA Form 20-0996 to the VR&E Intake Center in Janesville, with one informal conference. Board appeal: VA Form 10182 to the Board directly. One lane per issue at a time.'],
+      ['Read the decision for the element that failed', 'The letter has to name the elements not satisfied (38 CFR 21.420(b)(5)) and come with VA Form 20-0998, your review rights. Your response answers that element, not a general one: no employment handicap found, goal not feasible, training not needed for entry, facility. If you were only told no in a meeting or an email, ask for the written decision; the review clock and your rights attach to the letter.'],
+      ['Pick one review lane inside one year', 'Supplemental Claim if you have new and relevant evidence (an accommodation letter, a provider statement, job postings, proof the cheaper school lacks your program): VA Form 20-0995 to your regional office. Higher-Level Review if the error is in how the existing record was read: VA Form 20-0996 to the VR&E Intake Center in Janesville, with one informal conference. Board appeal: VA Form 10182 to the Board directly. One lane per issue at a time.'],
+      ['Chase the answer', 'A Higher-Level Review is supposed to be decided within 90 days. If the date passes and nothing has arrived, call and ask for the decision by email. Letters go missing in the mail, and your next deadline runs from the date on the letter whether you have seen it or not.'],
+      ['If the review upholds the denial, you are not done', 'You have one year from that outcome to move to another lane without losing your original filing date. The usual next step is a Supplemental Claim with evidence the reviewer did not have, with the Board as the backstop. This is also the point where some veterans apply again from the area where the school is, alongside the review, to get a different office looking at it.'],
       ['Restate the case in the letter', 'The letter on this page, filled in, is the statement that goes with a Supplemental Claim or that you walk a reviewer through in the informal conference.'],
       ['Get help', 'A VSO (DAV, VFW, American Legion) can represent you at no cost. Congressional casework applies here too.'],
     ],
@@ -216,7 +234,7 @@ export const ESCALATION = {
     ],
   },
 };
-export const REAPPLY_WARNING = 'A new application does not reverse a decision you already have. The one-year clock to review that decision (38 CFR 21.416) keeps running while you wait, and you can pursue an issue in only one review lane at a time. Move the existing case first: counselor, VR&E Officer, then the lane that fits, with congressional casework alongside.';
+export const REAPPLY_WARNING = 'Reapplying is not a substitute for reviewing the decision you already have. A new application does not reverse that decision, and the one-year clock on it keeps running (38 CFR 21.416). Some veterans do both, and that can be the right call: keep a review lane open on the existing decision, then apply again from the area where the school is to reach a different regional office. What you never do is let the year run out while you wait on a new application.';
 export const WH_HOTLINE = { label: 'White House VA Hotline', phone: '1-855-948-2311', verified: VERIFIED };
 
 /* ─── The line about 1:1 work (drafted for Zak’s review 9/30/26) ────────── */
@@ -230,6 +248,6 @@ export const ONE_ON_ONE = {
    justification questions are about the veteran\u2019s needs, and only question 3 touches outcomes. */
 export const PRESTIGE_NOTE = {
   title: 'Don\u2019t argue prestige. Argue the disability office.',
-  text: '\u201cIt\u2019s a better school,\u201d \u201cthe ranking,\u201d \u201cgraduates earn more,\u201d \u201ceasier to get hired\u201d: these do not carry a high-cost case anymore. That is the word coming out of recent high-cost reviews, and it matches how the manual is written. What carries it is specific: what this school\u2019s disability services office, veteran center, format, or location does for your rated conditions that the cheaper school\u2019s cannot. Name the accommodation, name the limit it addresses, and say what the alternative lacks. Three of the four questions the counselor has to answer are about your needs; only one touches placement, and it is a supporting line, not the case.',
+  text: 'Two arguments carry a high-cost case, and neither is the school\u2019s name. First: the cheaper school cannot deliver the training your goal requires, if that is true (say what it lacks). Second, and always: support for your disability. \u201cIt\u2019s a better school,\u201d \u201cthe ranking,\u201d \u201cgraduates earn more,\u201d \u201ceasier to get hired\u201d: these do not carry a high-cost case anymore. That is the word coming out of recent high-cost reviews, and it matches how the manual is written. What carries it is specific: what this school\u2019s disability services office, veteran center, format, or location does for your rated conditions that the cheaper school\u2019s cannot. Name the accommodation, name the limit it addresses, and say what the alternative lacks. Three of the four questions the counselor has to answer are about your needs; only one touches placement, and it is a supporting line, not the case.',
 };
 export const CANT_DO = 'This drafts the letter. It cannot read your rating decision or tell you whether your case is strong. That takes a person.';

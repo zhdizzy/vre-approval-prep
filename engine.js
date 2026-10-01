@@ -90,9 +90,16 @@ export function readiness(s) {
   let st6, why6, act6 = '';
   if (!s.cost) { st6 = 'thin'; why6 = 'Enter the annual cost. It decides who has to approve the plan and whether a memo is needed.'; act6 = 'Add tuition, fees, books, and supplies for one year.'; }
   else if (s.cost <= HIGH_COST_THRESHOLD) { st6 = 'doc'; why6 = `At ${fmtUSD(s.cost)} a year your counselor can approve the plan on their own authority. No memo.`; }
-  else if (altNamed && paired.length >= 2) { st6 = 'doc'; why6 = `Over ${fmtUSD(HIGH_COST_THRESHOLD)}: a memo goes to ${tier.approver}. You have named the alternative and matched ${paired.length} school supports to your limits, which is what the four questions ask for.`; }
-  else if (altNamed || paired.length >= 1) { st6 = 'thin'; why6 = `Over ${fmtUSD(HIGH_COST_THRESHOLD)}: a memo goes to ${tier.approver}. ${altNamed ? 'The alternative is named; now match at least two school supports to your limits.' : 'Supports are matched; now name the cheaper alternative the counselor will compare against.'}`; act6 = altNamed ? 'Check the school features in the drawer that pair with your limits.' : 'Enter the alternative’s name and annual cost in the drawer.'; }
-  else { st6 = 'miss'; why6 = `Over ${fmtUSD(HIGH_COST_THRESHOLD)}: a memo goes to ${tier.approver}, and the justification has to compare your school to the cheaper one on support for your disability. Nothing here makes that case yet.`; act6 = 'Name the alternative and check the school supports that pair with your limits.'; }
+  else {
+    // Over the line the case has two legs: (1) the cheaper school cannot deliver the plan's training
+    // (38 CFR 21.120(c)(1)(ii)), and (2) school supports matched to the veteran's limits (the four questions).
+    const legProgram = !!s.altLacksProgram, legSupport = paired.length >= 2;
+    const legs = (legProgram ? 1 : 0) + (legSupport ? 1 : 0);
+    const head = `Over ${fmtUSD(HIGH_COST_THRESHOLD)}: a memo goes to ${tier.approver}. `;
+    if (altNamed && legs >= 1) { st6 = 'doc'; why6 = head + (legProgram && legSupport ? `You have named the alternative, shown it cannot deliver the training your goal requires, and matched ${paired.length} school supports to your limits. That is both arguments.` : legProgram ? 'You have named the alternative and said it cannot deliver the training your goal requires. Under 38 CFR 21.120(c) that takes it out of the comparison. Add the school supports that match your limits to make the second argument too.' : `You have named the alternative and matched ${paired.length} school supports to your limits, which is what the four questions ask for.`); }
+    else if (altNamed || legs >= 1 || paired.length >= 1) { st6 = 'thin'; why6 = head + (altNamed ? 'The alternative is named. Now make at least one argument: it cannot deliver the training your goal requires, or this school\u2019s supports match your limits (two or more).' : 'You have an argument started. Now name the cheaper alternative the counselor will compare against.'); act6 = altNamed ? 'In the school card: tick \u201cdoesn\u2019t offer the program my goal requires\u201d if that is true, and check the supports that pair with your limits.' : 'Enter the alternative\u2019s name and annual cost in the school card.'; }
+    else { st6 = 'miss'; why6 = head + 'The justification has to compare your school to the cheaper one: can it deliver the training your goal requires, and does it support your disability the same way. Nothing here makes that case yet.'; act6 = 'Name the alternative, then say what it lacks: the program itself, or the supports that pair with your limits.'; }
+  }
   out.push({ id: 'cost', title: 'Cost: under the line, or justified', st: st6, why: why6, act: act6 });
 
   const visible = CHECKLIST.filter(c => c.showIf(s)), have = visible.filter(c => (s.evidence || []).includes(c.id)).length;

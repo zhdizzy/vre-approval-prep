@@ -814,6 +814,9 @@ details.how-it-works[open] summary { margin-bottom: 10px; }
 .warn-line { background: var(--warning-bg); border: 1.5px solid var(--warning-border); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.9rem; color: var(--text-primary); margin: 10px 0; }
 .warn-line strong { color: var(--accent); }
 
+/* Reported-not-confirmed note */
+.region-note { font-size: 0.86rem; color: var(--text-secondary); border-left: 3px solid var(--border-color); padding: 4px 0 4px 12px; margin: 8px 0 12px; font-style: italic; }
+
 /* One-on-one line (after the free content, never above it) */
 .one-line { margin: 14px 0 0; padding: 10px 14px; border-top: 1px dashed var(--border-color); font-size: 0.9rem; color: var(--text-secondary); }
 .one-line a { color: #8B6914; font-weight: 700; }

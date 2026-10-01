@@ -64,6 +64,8 @@ try {
   check(/id="letter-sheet"/.test(share.dom) && /VOCATIONAL GOAL AND REHABILITATION PLAN STATEMENT/.test(share.dom), 'letter renders');
   check(/Retroactive induction/.test(share.dom), 'enrolled share link includes the retroactive request');
   check(/class="lb"/.test(share.dom), 'brackets highlighted in the letter');
+  check(/\$50,000 is a signature line, not a limit/.test(share.dom), 'memo rule on the ladder card');
+  check(/First test: can the cheaper school deliver your plan at all\?/.test(share.dom), 'plan-services rule on the four-questions card');
   check(/id="letter-download"/.test(share.dom), 'Word download button present');
   check(/extension of entitlement beyond 48 months/i.test(share.dom), '36 months used + 2-year program: letter asks for the 48-month extension');
   check(/Public schools owe you the in-state rate/.test(share.dom), 'in-state tuition rule on the ladder card');
@@ -83,8 +85,15 @@ try {
 
   const denied = await chrome(BASE + '?m=denied&r=40&st=denied&wh=denied&source=vre-approval-prep');
   check(/<details class="stack-card" open=""[^>]*id="card-escalation"|id="card-escalation"[^>]*open/.test(denied.dom), 'denied mode leads with the escalation card');
-  check(/start over/.test(denied.dom), 'reapply warning present');
+  check(/Review first\. Reapply only alongside\./.test(denied.dom), 'reapply guidance present');
+  check(/Reported by veterans, not confirmed as policy/.test(denied.dom), 'regional-office note is labeled as reported');
+  check(/Chase the answer/.test(denied.dom), 'denied steps include chasing a late review decision');
   check(/Denied in writing/.test(denied.dom), 'happened picker drives the escalation title');
+
+  const memo = await chrome(BASE + '?m=pushback&r=70&st=in-program&ed=bach&pl=mast&c=90000&ob=memo&source=vre-approval-prep');
+  check(memo.errors.length === 0, 'pushback/memo: no console errors', memo.errors.slice(0, 3).join(' | '));
+  check(/M28C\.V\.B\.1\.02/.test(memo.dom) && /must complete and submit the high program costs memo/.test(memo.dom), 'memo objection quotes the manual');
+  check(/<details class="stack-card" open=""[^>]*id="card-objections"|id="card-objections"[^>]*open/.test(memo.dom), 'pushback mode leads with the objections card');
 
   const unrated = await chrome(BASE + '?m=first&r=unrated&st=not-applied&source=vre-approval-prep');
   check(unrated.errors.length === 0, 'unrated: no console errors', unrated.errors.slice(0, 3).join(' | '));

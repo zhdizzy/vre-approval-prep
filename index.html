@@ -140,6 +140,7 @@
                     <option value="employable">"You're already employable"</option>
                     <option value="lower">"A lower degree or shorter program is enough"</option>
                     <option value="cheaper">"Go to the cheaper school"</option>
+                    <option value="memo">"I can't approve anything over $50,000" / won't submit the memo</option>
                     <option value="goal">"That job goal doesn't fit" / wrong occupation in the plan</option>
                 </select>
             </div>
@@ -207,6 +208,10 @@
                             <label for="alt-name">Its name <span class="optional-tag">(on device)</span></label>
                             <input type="text" id="alt-name" placeholder="e.g. State University" autocomplete="off" maxlength="80">
                         </div>
+                    </div>
+                    <div class="fg-field">
+                        <label for="alt-lacks"><input type="checkbox" id="alt-lacks" style="width:auto;margin-right:8px;vertical-align:-1px">The cheaper alternative doesn't offer the program or specialization my goal requires</label>
+                        <p class="field-hint">Only if it's true. Under 38 CFR 21.120(c), a school that can't deliver the training in your plan isn't an alternative at all. You'll say exactly what it lacks in the letter.</p>
                     </div>
                 </div>
                 <div class="input-card" id="card-timing">

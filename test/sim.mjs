@@ -21,7 +21,7 @@ const PRIV_EMPTY = { jobs: [{}, {}, {}, {}], occupations: [{}, {}, {}] };
 const PRIV_FULL = { counselor: 'Ms. Ortega', branch: 'United States Army', serviceYears: '2009 to 2017', school: 'State University', program: 'M.S. in Cybersecurity', startTerm: 'January 2027', conditions: 'PTSD and lumbar strain', ratingWording: 'Difficulty in adapting to stressful circumstances\nChronic sleep impairment', accommodations: 'extended time', semesters: '2', gpa: '3.4', gradDate: 'May 2027', altName: 'County College', goal: 'a desk-based analyst role', jobs: [{ title: 'Warehouse supervisor', worked: false, reason: 'standing' }, { title: 'Help desk', worked: true, reason: 'structure' }, {}, {}], occupations: [{ title: 'Information Security Analyst', code: '15-1212.00', system: 'ONET' }, {}, {}] };
 
 function mk(o) {
-  return { mode: 'first', ratingRaw: '70', rating: 70, unrated: false, pending: false, status: 'applied', education: 'bach', programLevel: 'mast', cost: 24000, years: 2, objection: 'employable', happened: 'silent', weams: 'unsure', altCost: 0, enrolled: false, dischargeYear: null, firstRatingYear: null, activeDuty: false, deps: 0, gi: 'unsure', giUsed: null, limits: [], features: [], evidence: [], priv: PRIV_EMPTY, ...o };
+  return { mode: 'first', ratingRaw: '70', rating: 70, unrated: false, pending: false, status: 'applied', education: 'bach', programLevel: 'mast', cost: 24000, years: 2, objection: 'employable', happened: 'silent', weams: 'unsure', altCost: 0, altLacksProgram: false, enrolled: false, dischargeYear: null, firstRatingYear: null, activeDuty: false, deps: 0, gi: 'unsure', giUsed: null, limits: [], features: [], evidence: [], priv: PRIV_EMPTY, ...o };
 }
 
 const BAD = /undefined|NaN|\[object Object\]|null(?![a-z])/;
@@ -104,6 +104,18 @@ for (const mode of MODES) for (const R of RATINGS) for (const cost of COSTS) for
   ok(txt.includes('VOCATIONAL GOAL AND REHABILITATION PLAN STATEMENT'), 'docx carries the letter text');
   const amp = buildDocxBytes(buildLetter(mk({ priv: { ...PRIV_FULL, conditions: 'PTSD & back <strain>' } })));
   ok(new TextDecoder().decode(amp).includes('PTSD &amp; back &lt;strain&gt;'), 'XML special characters are escaped');
+}
+
+// The two-legged cost case, and the fifth objection
+{
+  const c = o => solve(mk({ cost: 90000, ...o })).ready.find(x => x.id === 'cost').st;
+  ok(c({}) === 'miss', 'over the line, nothing entered => missing');
+  ok(c({ altCost: 15000 }) === 'thin', 'alternative named only => thin');
+  ok(c({ altCost: 15000, altLacksProgram: true }) === 'doc', 'alternative named + it cannot deliver the plan => documented');
+  ok(c({ altLacksProgram: true }) === 'thin', 'program argument without naming the alternative => thin');
+  const txt = letterToText(buildLetter(mk({ cost: 90000, altCost: 15000, altLacksProgram: true, priv: PRIV_FULL })));
+  ok(/21\.120\(c\)\(1\)\(ii\)/.test(txt), 'letter cites 21.120(c)(1)(ii) when the alternative lacks the program');
+  ok(!/21\.120\(c\)\(1\)\(ii\)/.test(letterToText(buildLetter(mk({ cost: 90000, altCost: 15000, priv: PRIV_FULL })))), 'no program sentence unless the box is ticked');
 }
 
 // Feature pairing: a feature with no matching limit is left out of the letter
